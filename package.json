@@ -21,5 +21,8 @@
   "homepage": "https://github.com/Pokemon-URPG/kauri#readme",
   "workspaces": [
     "bot"
-  ]
+  ],
+  "eslintConfig": {
+    "extends": "neon"
+  }
 }
