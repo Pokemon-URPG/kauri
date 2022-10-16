@@ -1,5 +1,5 @@
-FROM node:16
-WORKDIR /usr/src/app
-COPY . . 
+FROM node:16-alpine
+WORKDIR /usr/src/bot
+COPY ./bot . 
 RUN npm install && npm run build
 CMD ["node", "./dist/index.js"]
