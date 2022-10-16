@@ -1,7 +1,7 @@
 name: Deploy
 
 on:
-  pull_request:
+  push:
     branches: [ "main" ]
   workflow_dispatch:
 
@@ -27,7 +27,7 @@ jobs:
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/kauri:latest
-          cache-from: type=registry,ref=ghcr.io/${{ github.repository_owner }}/kauri:buildcache
-          cache-to: type=registry,ref=ghcr.io/${{ github.repository_owner }}/kauri:buildcache,mode=max
+          tags: ghcr.io/monbrey/kauri:latest
+          cache-from: type=registry,ref=ghcr.io/monbrey/kauri:buildcache
+          cache-to: type=registry,ref=ghcr.io/monbrey/kauri:buildcache,mode=max
         
