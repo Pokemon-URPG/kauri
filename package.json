@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "description": "",
-  "main": "index.js",
+  "main": "./src/index.js",
+  "types": "./src/typings/index.d.ts",
   "scripts": {
     "build": "tsc -p ./src/tsconfig.json",
+    "lint": "eslint ./src --ext .ts",
     "start": "node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "tsc -p ./src/tsconfig.json --watch"
@@ -23,14 +25,32 @@
   "homepage": "https://github.com/Pokemon-URPG/kauri#readme",
   "devDependencies": {
     "@types/node": "^18.11.0",
+    "@types/string-similarity": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",
-    "eslint-config-neon": "^0.1.38",
     "typescript": "^4.8.4"
   },
   "dependencies": {
     "discord.js": "^14.6.0",
     "dotenv": "^16.0.3",
+    "eslint-config-neon": "^0.1.38",
+    "string-similarity": "^4.0.4",
     "undici": "^5.11.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "neon/typescript"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "plugins": [
+      "@typescript-eslint"
+    ],
+    "root": true,
+    "env": {
+      "node": true
+    }
   }
 }

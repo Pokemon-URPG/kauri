@@ -1,15 +1,15 @@
-import { Collection } from 'discord.js';
-import { readdirSync, statSync } from 'fs';
-import { pathToFileURL } from 'node:url';
-import { extname, join, resolve } from 'path';
-import type { KauriClient } from '../client/KauriClient';
-import { Module } from '../typings';
+import { readdirSync, statSync } from "fs";
+import { pathToFileURL } from "node:url";
+import { extname, join, resolve } from "path";
+import { Collection } from "discord.js";
+import type { KauriClient } from "../client/KauriClient.js";
+import type { Module } from "../typings";
 
-export interface BaseHandlerOptions {
+export type BaseHandlerOptions = {
 	directory: string;
 	extensions?: string[];
-	loadFilter?: (...args: any) => boolean;
-}
+	loadFilter?(...args: any): boolean;
+};
 
 /**
  * Module handler heavily inspired by (basically just modified from) Akairo
@@ -17,13 +17,19 @@ export interface BaseHandlerOptions {
  */
 export abstract class BaseHandler<T extends Module = Module> {
 	protected client: KauriClient;
-	protected directory = './';
-	protected extensions = new Set(['.js', '.json']);
+
+	protected directory = "./";
+
+	protected extensions = new Set([".js", ".json"]);
+
 	public modules: Collection<string, T>;
 
 	public constructor(client: KauriClient, options: BaseHandlerOptions) {
 		this.client = client;
-		if (options.extensions) this.extensions = new Set(options.extensions);
+		if (options.extensions) {
+			this.extensions = new Set(options.extensions);
+		}
+
 		this.directory = options.directory;
 		this.modules = new Collection<string, T>();
 	}
@@ -40,7 +46,9 @@ export abstract class BaseHandler<T extends Module = Module> {
 		}
 
 		const _module = await import(pathToFileURL(path).toString());
-		if (!_module.data || !_module.execute) return this;
+		if (!_module.data || !_module.execute) {
+			return this;
+		}
 
 		this.register(_module);
 
@@ -50,7 +58,7 @@ export abstract class BaseHandler<T extends Module = Module> {
 	public loadAll(directory = this.directory): this {
 		const files = BaseHandler.readdirRecursive(directory);
 		for (const file of files) {
-			this.load(resolve(file));
+			void this.load(resolve(file));
 		}
 
 		return this;
@@ -75,14 +83,17 @@ export abstract class BaseHandler<T extends Module = Module> {
 	// 	return item && (item instanceof this.classToLoad);
 	// }
 
-	public static async getDeploymentData(directory: string, extensions: Set<string> = new Set(['.js', '.json'])) {
+	public static async getDeploymentData(directory: string, extensions: Set<string> = new Set([".js", ".json"])) {
 		const files = BaseHandler.readdirRecursive(directory);
 		const data = [];
 		for (const file of files) {
 			if (extensions.has(extname(file))) {
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 				const module = await import(file);
-				if (!module.data) continue;
+				if (!module.data) {
+					continue;
+				}
+
 				data.push(module.data);
 			}
 		}

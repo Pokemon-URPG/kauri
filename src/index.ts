@@ -1,13 +1,12 @@
-import { GatewayIntentBits } from 'discord.js';
-import { config } from 'dotenv';
-import { fileURLToPath } from 'node:url';
-import { KauriClient } from './client/KauriClient.js';
+import { fileURLToPath } from "node:url";
+import { GatewayIntentBits } from "discord.js";
+import { config } from "dotenv";
+import { KauriClient } from "./client/KauriClient.js";
 
 config();
 
-global.__dirname = fileURLToPath(new URL('.', import.meta.url));
+global.__dirname = fileURLToPath(new URL(".", import.meta.url));
 
+const client = new KauriClient({ intents: [GatewayIntentBits.Guilds] });
 
-const client = new KauriClient({ intents: [GatewayIntentBits.Guilds ]});
-
-client.login();
+await client.login();
