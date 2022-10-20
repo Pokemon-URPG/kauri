@@ -1,7 +1,7 @@
-import type { AutocompleteInteraction, ChatInputCommandInteraction, CommandInteractionOption, ContextMenuCommandInteraction, Interaction } from "discord.js";
-import { ApplicationCommandOptionType, ApplicationCommandType, Events } from "discord.js";
+import type { AutocompleteInteraction, ChatInputCommandInteraction, CommandInteractionOption, Interaction } from "discord.js";
+import { ApplicationCommandOptionType, Events } from "discord.js";
 import type { KauriClient } from "../client/KauriClient.js";
-import type { ChatInputCommandModule, CommandModule, ContextMenuCommandModule } from "../typings/index.js";
+import type { ChatInputCommandModule, CommandModule } from "../typings/index.js";
 import type { BaseHandlerOptions } from "./BaseHandler.js";
 import { BaseHandler } from "./BaseHandler.js";
 
@@ -11,7 +11,7 @@ export class CommandHandler extends BaseHandler<ChatInputCommandModule> {
 	}
 
 	public setup(): this {
-		this.client.once("ready", () => {
+		this.client.once(Events.ClientReady, () => {
 			this.client.on(Events.InteractionCreate, async (i: Interaction) => {
 				if (!i.inCachedGuild()) {
 					return;
