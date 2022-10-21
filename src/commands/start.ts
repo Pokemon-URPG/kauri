@@ -47,7 +47,7 @@ export const execute = async (interaction: ChatInputCommandInteraction<"cached">
 	}
 
 	const reply = await interaction.reply({
-		content: `So! You want the ${pokemon.type1} Pokémon, ${pokemon.name}?`,
+		content: `So! You want the ${pokemon.category}, ${pokemon.name}?`,
 		components: [{
 			type: 1, components: [{
 				type: 2,
@@ -79,7 +79,7 @@ export const execute = async (interaction: ChatInputCommandInteraction<"cached">
 					components: [],
 				});
 				void btn.followUp({
-					content: `${btn.user} just chose to start their journey with ${pokemon.name} as their partner!`,
+					content: `${btn.user} just chose to start their journey with ${pokemon.name}, the ${pokemon.category} as their partner!`,
 				});
 		}
 	} catch (e) {
