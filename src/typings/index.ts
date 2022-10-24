@@ -1,5 +1,12 @@
-import type { AutocompleteInteraction, Awaitable, ChatInputCommandInteraction, ClientEvents, ContextMenuCommandBuilder, ContextMenuCommandInteraction, Events, SlashCommandBuilder } from "discord.js";
+import type { Directus, TypeMap } from "@directus/sdk";
+import type { AutocompleteInteraction, Awaitable, ChatInputCommandInteraction, ContextMenuCommandBuilder, ContextMenuCommandInteraction, Events, SlashCommandBuilder } from "discord.js";
 
+declare module "discord.js" {
+	// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+	interface Client {
+		db: Directus<TypeMap>;
+	}
+}
 export type CommandConfig = {
 
 };

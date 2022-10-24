@@ -9,4 +9,5 @@ global.__dirname = fileURLToPath(new URL(".", import.meta.url));
 
 const client = new KauriClient({ intents: [GatewayIntentBits.Guilds] });
 
+await client.init();
 await client.login();

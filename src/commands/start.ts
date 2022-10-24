@@ -1,8 +1,7 @@
 import type { AutocompleteInteraction, ChatInputCommandInteraction } from "discord.js";
-import { ButtonStyle } from "discord.js";
-import { SlashCommandBuilder } from "discord.js";
+import { ButtonStyle, SlashCommandBuilder } from "discord.js";
+import { findBestMatch } from "string-similarity";
 import { request } from "undici";
-import { findBestMatch, Rating } from "string-similarity";
 
 const cache: {
 	data: any[];
@@ -35,6 +34,14 @@ export const autocomplete = async (interaction: AutocompleteInteraction<"cached"
 };
 
 export const execute = async (interaction: ChatInputCommandInteraction<"cached">) => {
+	const { data } = await interaction.client.db.items("trainers").readByQuery({ filter: { discord_id: { _eq: interaction.user.id } } });
+	if (data?.length !== 0) {
+		return void interaction.reply({
+			content: "You've already started your journey! Restarts are not yet supported.",
+			ephemeral: true,
+		});
+	}
+
 	const selection = interaction.options.getString("pokemon");
 	const pokemon = cache.data.find(d => d.name === selection);
 
@@ -78,9 +85,19 @@ export const execute = async (interaction: ChatInputCommandInteraction<"cached">
 					content: "Selection confirmed!",
 					components: [],
 				});
-				void btn.followUp({
-					content: `${btn.user} just chose to start their journey with ${pokemon.name}, the ${pokemon.category} as their partner!`,
+				await interaction.client.db.items("trainers").createOne({
+					discord_id: interaction.user.id,
+					name: interaction.user.username,
+					cash: 5000,
+					roster: {
+						create: [{ trainer_id: "+", species_id: pokemon.id }],
+					},
 				});
+				if (btn.channel) {
+					void btn.channel.send({
+						content: `${btn.user} just chose to start their journey with ${pokemon.name}, the ${pokemon.category} as their partner!`,
+					});
+				}
 		}
 	} catch (e) {
 		void interaction.editReply({
