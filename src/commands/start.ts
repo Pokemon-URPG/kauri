@@ -1,4 +1,5 @@
 import type { AutocompleteInteraction, ChatInputCommandInteraction } from "discord.js";
+import { ComponentType } from "discord.js";
 import { SlashCommandBuilder } from "discord.js";
 import { findBestMatch } from "string-similarity";
 import { Buttons } from "../common/Components.js";
@@ -61,7 +62,7 @@ export const execute = async (interaction: ChatInputCommandInteraction<"cached">
 
 	const reply = await interaction.reply({
 		content: Messages.Commands.Start.ConfirmSelection(pokemon),
-		components: [{ type: 1, components: [Buttons.Cancel(), Buttons.Confirm()] }],
+		components: [{ type: ComponentType.ActionRow, components: [Buttons.Cancel(), Buttons.Confirm()] }],
 		ephemeral: true,
 	});
 
