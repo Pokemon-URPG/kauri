@@ -1,7 +1,8 @@
 import type { AutocompleteInteraction, ChatInputCommandInteraction } from "discord.js";
-import { ButtonStyle, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { findBestMatch } from "string-similarity";
-import { request } from "undici";
+import { Buttons } from "../common/Components.js";
+import { Messages } from "../common/Messages.js";
 
 const cache: {
 	data: any[];
@@ -21,15 +22,20 @@ export const data = new SlashCommandBuilder()
 
 export const autocomplete = async (interaction: AutocompleteInteraction<"cached">) => {
 	if (cache.lastFetched < Date.now() - 86400) {
-		const { data } = await request("https://kauri.monbrey.com.au/items/species", {
-			query: { limit: 1000 },
-		}).then(async ({ body }) => body.json());
-		cache.data = data.filter((d: any) => d.starter_eligible);
+		const { data } = await interaction.client.db.items("species").readByQuery({
+			fields: ["name", "id", "category"],
+			filter: { starter_eligible: true },
+			limit: -1,
+		});
+
+		if (data?.length) {
+			cache.data = data;
+			cache.lastFetched = Date.now();
+		}
 	}
 
 	const { ratings } = findBestMatch(interaction.options.getFocused(), cache.data.map((d: any) => d.name));
 	const response = ratings.sort((a, b) => b.rating - a.rating).map(r => ({ name: r.target, value: r.target })).slice(0, 5);
-	console.log(response);
 	void interaction.respond(response);
 };
 
@@ -37,7 +43,7 @@ export const execute = async (interaction: ChatInputCommandInteraction<"cached">
 	const { data } = await interaction.client.db.items("trainers").readByQuery({ filter: { discord_id: { _eq: interaction.user.id } } });
 	if (data?.length !== 0) {
 		return void interaction.reply({
-			content: "You've already started your journey! Restarts are not yet supported.",
+			content: Messages.Commands.Start.AlreadyStarted,
 			ephemeral: true,
 		});
 	}
@@ -47,27 +53,15 @@ export const execute = async (interaction: ChatInputCommandInteraction<"cached">
 
 	if (!pokemon) {
 		void interaction.reply({
-			content: "No matching Pokemon found. Make sure you select an option from the list!",
+			content: Messages.Commands.Start.InvalidChoice,
 			ephemeral: true,
 		});
 		return;
 	}
 
 	const reply = await interaction.reply({
-		content: `So! You want the ${pokemon.category}, ${pokemon.name}?`,
-		components: [{
-			type: 1, components: [{
-				type: 2,
-				customId: "cancel",
-				label: "Cancel",
-				style: ButtonStyle.Secondary,
-			}, {
-				type: 2,
-				customId: "confirm",
-				label: "Confirm",
-				style: ButtonStyle.Primary,
-			}],
-		}],
+		content: Messages.Commands.Start.ConfirmSelection(pokemon),
+		components: [{ type: 1, components: [Buttons.Cancel(), Buttons.Confirm()] }],
 		ephemeral: true,
 	});
 
@@ -76,13 +70,13 @@ export const execute = async (interaction: ChatInputCommandInteraction<"cached">
 		switch (btn.customId) {
 			case "cancel":
 				void btn.update({
-					content: "Starter selection cancelled.",
+					content: Messages.Commands.Start.SelectionCancelled,
 					components: [],
 				});
 				return;
 			case "confirm":
 				await btn.update({
-					content: "Selection confirmed!",
+					content: Messages.Commands.Start.SelectionConfirmedPrivate,
 					components: [],
 				});
 				await interaction.client.db.items("trainers").createOne({
@@ -95,15 +89,14 @@ export const execute = async (interaction: ChatInputCommandInteraction<"cached">
 				});
 				if (btn.channel) {
 					void btn.channel.send({
-						content: `${btn.user} just chose to start their journey with ${pokemon.name}, the ${pokemon.category} as their partner!`,
+						content: Messages.Commands.Start.SelectionConfirmedPublic(pokemon, btn.user),
 					});
 				}
 		}
 	} catch (e) {
 		void interaction.editReply({
-			content: "Starter selection timed out.",
+			content: Messages.Commands.Start.SelectionTimedOut,
 			components: [],
 		});
 	}
-
 };
